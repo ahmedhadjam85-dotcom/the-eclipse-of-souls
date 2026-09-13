@@ -1,0 +1,421 @@
+/* =========================================================
+   Eclipse of Souls — style.css
+   Full stylesheet: menus, HUD, touch controls, dialogue,
+   chapter banners, and small "juice" animations throughout.
+   Kept to plain CSS (no images, no heavy filters) — cheap to
+   render on Xbox Series S.
+   ========================================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #0a0a12;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+  color: #eee;
+  position: relative;
+}
+
+/* Subtle animated eclipse glow behind everything */
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%; left: 50%;
+  width: 900px; height: 900px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle,
+    rgba(122,43,255,0.16) 0%,
+    rgba(122,43,255,0.06) 35%,
+    transparent 70%);
+  animation: pulseGlow 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.08); }
+}
+
+/* Cinematic vignette frame — a soft dark border all around the
+   viewport. Kept DELIBERATELY subtle: an earlier, stronger version
+   of this accidentally darkened the corners enough to make the
+   phone D-pad buttons nearly invisible — this is the fix. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  box-shadow: inset 0 0 50px 6px rgba(0,0,0,0.35);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.screen {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden { display: none !important; }
+
+/* ---------- Main Menu ---------- */
+.title {
+  font-size: clamp(28px, 6vw, 56px);
+  letter-spacing: 6px;
+  margin-bottom: 40px;
+  color: #f2f2f2;
+  text-shadow: 0 0 14px #7a2bff, 0 0 30px #7a2bff55, 0 0 60px #7a2bff33;
+  animation: titleFlicker 4s ease-in-out infinite;
+}
+.title span {
+  color: #7a2bff;
+  font-style: italic;
+  font-size: 0.6em;
+  letter-spacing: 2px;
+  vertical-align: middle;
+}
+@keyframes titleFlicker {
+  0%, 92%, 100% { opacity: 1; }
+  94% { opacity: 0.75; }
+  96% { opacity: 1; }
+}
+
+.menuBtn {
+  position: relative;
+  background: transparent;
+  border: 2px solid #7a2bff;
+  color: #eee;
+  padding: 14px 40px;
+  font-size: 18px;
+  font-family: inherit;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+.menuBtn:hover, .menuBtn:focus {
+  background: #7a2bff;
+  color: #0a0a12;
+  box-shadow: 0 0 18px #7a2bff88;
+}
+.menuBtn:active {
+  transform: scale(0.96);
+}
+
+.studioTag {
+  position: absolute;
+  bottom: 22px;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #6a6a7a;
+  text-transform: uppercase;
+}
+
+/* ---------- Control Select ---------- */
+.subtitle {
+  font-size: 22px;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #7a2bff55;
+}
+.controlOptions {
+  display: flex;
+  gap: 24px;
+}
+.controlBox {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #444;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.controlBox:hover {
+  border-color: #7a2bff88;
+  transform: translateY(-3px);
+}
+.controlBox.selected {
+  border-color: #7a2bff;
+  background: #7a2bff22;
+  box-shadow: 0 0 20px #7a2bff55;
+}
+.controlIcon {
+  font-size: 36px;
+  transition: transform 0.15s;
+}
+.controlBox:hover .controlIcon {
+  transform: scale(1.12);
+}
+
+/* ---------- Game Screen ---------- */
+#gameScreen {
+  position: relative;
+  justify-content: flex-start;
+}
+
+#hud {
+  width: 100%;
+  max-width: 500px;
+  padding: 14px 20px 0;
+}
+.hudRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.hudLabel {
+  width: 70px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #aaa;
+}
+.barOuter {
+  flex: 1;
+  height: 12px;
+  border: 1px solid #555;
+  background: #111;
+  position: relative;
+  overflow: hidden;
+}
+.barInner {
+  height: 100%;
+  width: 100%;
+  transition: width 0.15s ease-out;
+  position: relative;
+}
+/* a soft moving shimmer across each bar — cheap (pure CSS gradient) */
+.barInner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  background-size: 200% 100%;
+  animation: barShimmer 2.4s linear infinite;
+}
+@keyframes barShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.bossFill { background: #ff3b3b; }
+.energyFill { background: #ffd23b; }
+
+#gameCanvas {
+  display: block;
+  background: #0d0d16;
+  margin: 10px auto 0;
+  border: 2px solid #333;
+  touch-action: none;
+}
+
+/* ---------- Touch Controls ---------- */
+#touchControls {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 30px;
+  pointer-events: none;
+}
+#dpad {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  pointer-events: auto;
+}
+.dpadBtn {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  background: #ffffff2a;
+  border: 2px solid #ffffff66;
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  padding: 0;
+  box-shadow: 0 0 10px #00000088;
+  transition: background 0.1s, border-color 0.1s, transform 0.1s;
+}
+.dpadBtn:active {
+  background: #7a2bff77;
+  border-color: #7a2bff;
+  transform: scale(0.92);
+}
+.posUp    { top: 0;    left: 51px; }
+.posDown  { top: 102px; left: 51px; }
+.posLeft  { top: 51px; left: 0; }
+.posRight { top: 51px; left: 102px; }
+
+#attackBtn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #ff3b3b44;
+  border: 2px solid #ff3b3bcc;
+  box-shadow: 0 0 10px #00000088;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: #fff;
+  pointer-events: auto;
+  align-self: flex-end;
+  transition: background 0.1s, transform 0.1s;
+  animation: attackPulse 2.2s ease-in-out infinite;
+}
+#attackBtn:active {
+  background: #ff3b3b66;
+  transform: scale(0.92);
+  animation: none;
+}
+@keyframes attackPulse {
+  0%, 100% { box-shadow: 0 0 0 0 #ff3b3b33; }
+  50%      { box-shadow: 0 0 0 8px #ff3b3b00; }
+}
+
+/* ---------- Boss Name Tag ---------- */
+#bossNameTag {
+  text-align: center;
+  margin-bottom: 8px;
+  animation: fadeInDown 0.6s ease-out;
+}
+#bossName {
+  display: block;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: #fff;
+  text-shadow: 0 0 10px #ff3b3b88;
+}
+#bossName::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: #ff3b3b88;
+  margin: 4px auto 0;
+}
+#bossTitle {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #999;
+  font-style: italic;
+  margin-top: 4px;
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Chapter Banner ---------- */
+#chapterBanner {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a12;
+  z-index: 10;
+  animation: chapterFade 3s ease-in-out forwards;
+}
+#chapterBannerText {
+  position: relative;
+  font-size: clamp(20px, 5vw, 34px);
+  letter-spacing: 4px;
+  color: #7a2bff;
+  text-shadow: 0 0 20px #7a2bff88;
+  padding-bottom: 14px;
+}
+#chapterBannerText::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 50%;
+  width: 60px;
+  height: 2px;
+  background: #7a2bff;
+  transform: translateX(-50%);
+  box-shadow: 0 0 10px #7a2bff;
+}
+@keyframes chapterFade {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+/* ---------- Dialogue Box ---------- */
+#dialogueBox {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  margin: 0 auto;
+  max-width: 520px;
+  background: linear-gradient(180deg, #14141fee, #0a0a12ee);
+  border-top: 2px solid #7a2bff;
+  padding: 16px 20px;
+  z-index: 20;
+  cursor: pointer;
+  animation: slideUp 0.25s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+#dialogueSpeaker {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #7a2bff;
+  margin-bottom: 6px;
+  min-height: 16px;
+}
+#dialogueText {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #eee;
+  min-height: 44px;
+}
+#dialogueHint {
+  text-align: left;
+  font-size: 11px;
+  color: #666;
+  margin-top: 8px;
+  animation: blinkHint 1.4s ease-in-out infinite;
+}
+@keyframes blinkHint {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+
+/* ---------- Victory / Defeat flash ---------- */
+.screenFlash {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 15;
+  animation: flashOut 0.4s ease-out forwards;
+}
+@keyframes flashOut {
+  from { background: #ffffff33; }
+  to   { background: #ffffff00; }
+}
